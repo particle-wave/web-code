@@ -1,0 +1,22 @@
+-- VERSION_4
+-- START DISKCACHE
+C:\Users\Elaine\Documents\GitHub\particlewave\data\.metadata\.plugins\org.eclipse.core.resources\.projects\BAAQMDscrape\com.python.pydev.analysis\v2_indexcache
+baaqmdScraper2|1436218355037|C:\Users\Elaine\Documents\GitHub\particlewave\data\BAAQMDscrape\baaqmdScraper2.py
+-- END DISKCACHE
+-- START DICTIONARY
+1
+1=baaqmdScraper2
+-- END DICTIONARY
+-- START TREE 1
+7
+cur|0|
+dat|0|
+end|0|
+get|2|getTable!10@getData!10@
+hel|0|
+mai|1|main!10@
+pul|0|
+-- END TREE
+-- START TREE 2
+0
+-- END TREE

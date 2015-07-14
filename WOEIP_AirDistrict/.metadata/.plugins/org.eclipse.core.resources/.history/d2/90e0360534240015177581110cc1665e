@@ -1,0 +1,111 @@
+
+import urllib, sys, re
+from cgitb import html
+from operator import pos
+
+
+def helperParser(startString, startTag, endTag):
+    """
+    pulls values from startString that are between begin and end
+    """
+    start = startString.find(startTag)
+    sub = startString[start+len(startTag):]
+    endInd = sub.find(endTag)
+    return sub[:endInd]
+
+def getTable(html):
+    tableStart = html.find("<table class=\"gate1\" border=\"0\" cellpadding=\"3\" cellspacing=\"1\">")
+    #cut everything until tableStart
+    html = html[tableStart:]
+    tableEnd = html.find("</table>") + len(" </table>") + 1
+    return html
+#[:tableEnd]
+
+def getData(tableHtml):
+    '''
+    this assumes hourly data laid out by rows in the following order: hours[0-23], Max, Avg
+    I set up a text document with comma separated headers Date,[Hours 0 - 23],Max,Avg to append to.
+    No data currently shows up as rowData greyBkg"
+    
+    "Point" here refers to a single measurement.
+    
+    Returns two rows of data. the first, data readings, max, and average. The second is a list of 24-hour change values.
+    '''
+    beginRow = "<td class=\"rowData\">"
+    endRow = "</td>"
+    noDataTag = "greyBkg"
+    dataTag = "<div class=\"cData\">"
+    dataTagEnd = "</div>"
+    diffTags = ["<div class=\"cDiffpos\">", "<div class=\"cDiffneg\">"]
+    diffTagEnd = "</div>"
+    maxTag = "<td class=\"tally1 rEnderB\">
+    avgTag = "rEnderA"
+    noDataRep = "#NA"
+    sepChar = ','
+    newline = '\n'
+    
+    dataString = ""
+    diffString = ""
+    
+    while tableHtml:
+        #subscript next row, cast to a different string
+        startInd = tableHtml.find(beginRow)
+        if (startInd>=0):
+            tableHtml = tableHtml[startInd:]
+            endInd = tableHtml.find(endRow) + len(endRow)
+            currPoint = tableHtml[:endInd]
+            print currPoint
+            
+            if currPoint:
+                #if this datapoint is nodata, write noDataRep to both strings
+                if(currPoint.find(noDataTag)>=0):
+                    dataString+=noDataRep + sepChar
+                    diffString+=noDataRep + sepChar
+                
+                #else check if it's a data point
+                elif(currPoint.find(dataTag)>=0):
+                    dataPoint = helperParser(currPoint, dataTag, dataTagEnd)
+                    dataString+=dataPoint + sepChar
+                    #now cut off the data point and find the diff
+                    for tag in diffTags: 
+                        startDiff = currPoint.find(tag)
+                        if startDiff >= 0: #there is a diff value
+                            dataDiff = helperParser(currPoint, tag, dataTagEnd)
+                            diffString+= dataDiff + sepChar
+                            break
+            #destructively cut row we just read
+            tableHtml = tableHtml[endInd:]
+        else:
+            break
+    #done with rows, check for summary dtats
+    print tableHtml
+    if(tableHtml.find(maxTag)>=0):
+        max = helperParser(tableHtml, maxTag, endRow)
+        dataString+= max + sepChar        
+    if(tableHtml.find(avgTag)>=0):
+        avg = helperParser(tableHtml, avgTag, endRow)
+        dataString+= avg + sepChar     
+    
+    print dataString + newline
+    print diffString + newline
+
+   # return [dataString, diffString]
+        
+
+              
+                
+#main function
+def main():
+    #parsing args: first arg is date, second arg is the file to append to
+    date = sys.argv[1]
+    outfile = sys.argv[2]
+    #open url based on date. ParameterID = 316 stands for PM2.5. StationID 1027 refers to Oakland West Station
+    url = urllib.urlopen("http://www.baaqmd.gov/about-air-quality/current-air-quality/air-monitoring-data?DataViewFormat=daily&DataView=tech&StartDate=7/5/2015&ParameterId=316&StationId=1027")
+    #url = urllib.urlopen("http://www.baaqmd.gov/about-air-quality/current-air-quality/air-monitoring-data?DataViewFormat=daily&DataView=tech&StartDate=" + date + "&ParameterId=316&StationId=1027")
+    html = url.read()    
+    fullTable = getTable(html)
+    print getData(fullTable)  
+    url.close
+
+if __name__ == "__main__":
+	main()

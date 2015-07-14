@@ -1,0 +1,56 @@
+EXTRACT DATE
+grep "Test Start Date" $file | cut -f 2 -d ","
+
+EXTRACT START TIME, SAVE TO VARIABLE
+//get entire timestamp
+rawtime="$(grep "Test Start Time" $file | cut -f 2 -d ",")"
+//get hour only
+hour="$(echo $rawtime | cut -f 1 -d ":")"
+//extract meridiem
+meridiem="$(echo $rawtime | cut -f 2 -d " ")"
+//check if PM, if so, add 12 to hour
+if [ $meridiem = "PM" ]; then hour=$((hour + 12)); fi
+
+COUNT NUMBER READINGS
+//get first header line
+header="$(grep -n "Elapsed Time" WOEIP_22062011.csv | cut -f 1 -d ":")"
+//get num readings
+numreadings=$(($(wc -l < WOEIP_22062011.csv) - header))
+
+SUBSET FIRST 3600 READINGS
+awk -v val=$header 'NR>val && NR<=3600{print $1}' $file
+//grab list of pm2.5
+awk -F "," -v val=$header 'NR>val && NR<=3600{print $2}' $file
+//print summary stats
+ awk -F "," -v val=$header 'NR>val && NR<=3600{print $2}' $file | sort -n | awk '
+  BEGIN {
+     c = 0;
+     sum = 0;
+   }
+   $1 ~ /^[0-9]*(\.[0-9]*)?$/ {
+     a[c++] = $1;
+     sum += $1;
+   }
+   END {
+     ave = sum / c;
+     if( (c % 2) == 1 ) {
+       median = a[ int(c/2) ];
+     } else {
+       median = ( a[c/2] + a[c/2-1] ) / 2;
+     }
+     min = a[0];
+     max = a[c-1];
+     range = max - min;
+     OFS="\t";
+     print sum, c, ave, median, min, max, range; 
+   }
+ '
+
+//open BAAQMD csv in wordpad, save as
+//Grab 2.5 line from file
+grep -a --text "PM2.5 Continuous" BAAQMD_22062012.csv
+//grep -a --text "PM2.5 Continuous" BAAQMD_22062012.csv | cut -f $(($hour + 1)) -d ","
+
+
+
+

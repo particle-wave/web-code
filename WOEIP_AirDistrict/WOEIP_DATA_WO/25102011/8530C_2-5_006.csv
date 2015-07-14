@@ -1,0 +1,28 @@
+Instrument Name,DustTrak II
+Model Number,8530
+Serial Number,8530100707
+Firmware Version,2.8
+Calibration Date,06/27/2011
+Test Name,8530C_2-5_006
+Test Start Time,09:57:34 AM
+Test Start Date,09/29/2011
+Test Length [D:H:M],0:0:0
+Test Interval [M:S],0:1
+Mass Average [mg/m3],0.009
+Mass Minimum [mg/m3],0.007
+Mass Maximum [mg/m3],0.011
+Mass TWA [mg/m3],0.000
+Photometric User Cal,1.00
+Flow User Cal,1.00
+Errors,
+Number of Samples,8
+
+Elapsed Time [s],Mass [mg/m3],Alarms,Errors
+1,0.007,,
+2,0.008,,
+3,0.009,,
+4,0.010,,
+5,0.008,,
+6,0.009,,
+7,0.011,,
+8,0.011,,
